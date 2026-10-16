@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Novo Usuário')
@@ -25,6 +26,7 @@
                 </ul>
             </div>
         @endif
+
         <form action="{{ route('usuarios.store') }}" method="POST" class="mt-6 space-y-4">
             @csrf
 
@@ -70,6 +72,7 @@
                 <a href="{{ route('admin.dashboard') }}" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                     Cancelar
                 </a>
+
                 <button type="submit" class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">
                     Salvar Usuário
                 </button>
