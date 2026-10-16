@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers;
@@ -8,12 +9,15 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    /**
+     * Exibe a lista de usuários e permite pesquisar pelo nome.
+     */
     public function index(Request $request)
     {
         $busca = $request->input('busca');
 
         if ($busca) {
-            $usuarios = User::where('name', 'like', "%{$busca}%", 'and')
+            $usuarios = User::where('name', 'like', "%{$busca}%")
                 ->orderBy('name', 'asc')
                 ->get();
         } else {
@@ -23,11 +27,17 @@ class UserController extends Controller
         return view('admin.dashboard', compact('usuarios', 'busca'));
     }
 
+    /**
+     * Exibe o formulário de cadastro de usuários.
+     */
     public function create()
     {
         return view('users.create');
     }
 
+    /**
+     * Salva um novo usuário no banco de dados.
+     */
     public function store(Request $request)
     {
         $dadosValidados = $request->validate([
@@ -36,13 +46,18 @@ class UserController extends Controller
             'password' => 'required|min:6',
         ]);
 
+        $dadosValidados['password'] = bcrypt($dadosValidados['password']);
+
         User::create($dadosValidados);
 
-        return redirect('/admin')->with('sucesso', 'Usuário cadastrado com sucesso');
+        return redirect('/admin')->with(
+            'sucesso',
+            'Usuário cadastrado com sucesso.'
+        );
     }
 
     /**
-     * Localiza o usuário pelo ID e exibe o formulário de edição preenchido.
+     * Localiza o usuário pelo ID e exibe o formulário de edição.
      */
     public function edit($id)
     {
@@ -52,13 +67,12 @@ class UserController extends Controller
     }
 
     /**
-     * Valida os novos dados e atualiza o registro no banco de dados.
+     * Valida os dados e atualiza o usuário.
      */
     public function update(Request $request, $id)
     {
         $usuario = User::findOrFail($id);
 
-        // Validação garantindo que o e-mail continue único, ignorando o próprio ID do usuário
         $dadosValidados = $request->validate([
             'name' => 'required|min:3|max:255',
             'email' => [
@@ -69,29 +83,32 @@ class UserController extends Controller
             'password' => 'nullable|min:6',
         ]);
 
-        // Se o campo de senha não foi preenchido, remove do array para não sobrescrever com valor vazio
         if (empty($dadosValidados['password'])) {
             unset($dadosValidados['password']);
+        } else {
+            $dadosValidados['password'] = bcrypt($dadosValidados['password']);
         }
 
-        // Atualiza os dados no banco de dados
         $usuario->update($dadosValidados);
 
-        return redirect('/admin')->with('sucesso', 'Usuário atualizado com sucesso');
+        return redirect('/admin')->with(
+            'sucesso',
+            'Usuário atualizado com sucesso.'
+        );
     }
 
-     /**
-     * Remove o registro do usuário no banco de dados.
+    /**
+     * Remove o usuário do banco de dados.
      */
     public function destroy($id)
     {
         $usuario = User::findOrFail($id);
 
-        // Executa a exclusão do registro
         $usuario->delete();
 
-        // Redireciona de volta com mensagem de feedback
-        return redirect('/admin')->with('sucesso', 'Item removido com sucesso');
+        return redirect('/admin')->with(
+            'sucesso',
+            'Usuário removido com sucesso.'
+        );
     }
-
 }
